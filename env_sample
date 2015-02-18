@@ -1,0 +1,6 @@
+# IDOL
+IDOL_API_KEY=<Your IDOL api key>
+
+# Mailjet
+MAILJET_API_KEY=<Your mailjet api key>
+MAILJET_SECRET_KEY=<Your mailjet secret key>
