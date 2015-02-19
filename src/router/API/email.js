@@ -28,3 +28,5 @@ router.use(idol);
 // Define the router endpoints.
 // ----------------------------------------------------------
 router.post('/', emailCtrl.send);
+router.get('/history', emailCtrl.history);
+router.get('/search', emailCtrl.search);

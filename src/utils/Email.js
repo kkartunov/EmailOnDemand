@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2015 TopCoder Inc., All Rights Reserved.
  *
- * Represents send Email class.
+ * Represents Email class.
  * Integrated with Mailjet API currently,
  * which is used for the actual sending of the emails.
  *
@@ -32,7 +32,7 @@ if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY) {
 module.exports = Email;
 
 /**
- * Represents send Email class.
+ * Represents the Email class.
  *
  * @constructs Email
  * @param {Object} Idol Instance obtained from `idol-client` library.
@@ -45,6 +45,22 @@ function Email(Idol) {
 }
 
 /**
+ * Error response factory.
+ *
+ * @param {Number} code The HTTP status code.
+ * @param {String} msg The reason field in the response.
+ * @returns {Object} The response to send to client.
+ */
+Email.prototype.error = function (code, msg) {
+    return {
+        status: code,
+        json: {
+            reason: msg
+        }
+    };
+};
+
+/**
  * Send email.
  *
  * @param {Object} body The body data sent to `/email` endpoint.
@@ -53,10 +69,29 @@ function Email(Idol) {
  */
 Email.prototype.send = function (body, files) {
     var Idol = this.Idol,
+        _error = this.error,
         Tree = new Recipients(Idol),
-        rawTo = JSON.parse(body.to);
+        rawTo = {};
 
     log.debug('Sending parameters', body, files);
+
+    // Some inputs validations...
+    if (!body.from) {
+        return Idol.Q().thenReject(_error(400, 'Field `from` is required'));
+    }
+    try {
+        // Parse the `to` parameter.
+        // It should be object with similar structure like `BigTree`.
+        rawTo = JSON.parse(body.to);
+    } catch (e) {
+        return Idol.Q().thenReject(_error(400, 'Invalid `to` field. Can not parse JSON: ' + e.message));
+    }
+    if (!body.subject) {
+        return Idol.Q().thenReject(_error(400, 'Field `subject` is required'));
+    }
+    if (!body.html) {
+        return Idol.Q().thenReject(_error(400, 'Field `html` is required'));
+    }
 
     return Tree.fetch().then(
         function (BigTree) {
@@ -74,14 +109,9 @@ Email.prototype.send = function (body, files) {
                     }
                 });
                 log.info('Secure recipients ->', to);
+                // Some validation.
                 if (!to.length) {
-                    reject({
-                        status: 400,
-                        json: {
-                            reason: 'At least 1 recipient is required'
-                        }
-                    });
-                    return;
+                    return reject(_error(400, 'At least 1 valid recipient is required'));
                 }
 
                 // When still here, Prepare request...
@@ -135,13 +165,15 @@ Email.prototype.send = function (body, files) {
 };
 
 /**
- * List messagehistory of Mailjet.
+ * List messagehistory via Mailjet API.
  *
  * @param {Object} query The query sent to `/history` endpoint.
  * @returns {Q.Promise} Promise
  */
 Email.prototype.history = function (query) {
     log.debug('History query ->', query);
+    query = _.omit(query, 'apikey');
+
     return this.Idol.Q.Promise(function (resolve, reject) {
         if (_.isEmpty(query)) {
             query = '';
@@ -158,8 +190,26 @@ Email.prototype.history = function (query) {
                     log.error(err, res.body, res.text);
                     reject(err || res);
                 } else {
-                    resolve(res.text);
+                    resolve(res.body);
                 }
             });
+    });
+};
+
+/**
+ * Search indexed email by query.
+ *
+ * @param {Object} query The query sent to `/search` endpoint.
+ * @returns {Q.Promise} Promise
+ */
+Email.prototype.search = function (query) {
+    log.info('Query indexed messages', query);
+    return this.Idol.queryTextIndex({
+        parameters: {
+            text: query.text,
+            indexes: config.APP_EMAILS_IDOL_INDEX,
+            highlight: 'terms',
+            print: 'all'
+        }
     });
 };

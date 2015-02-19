@@ -210,22 +210,15 @@ module.exports = {
      * @param {Object} res  Express response.
      */
     search: function (req, res) {
-        log.info('Query indexed messages', req.query);
-        req.IDOL.queryTextIndex({
-            parameters: {
-                text: req.query.text,
-                indexes: config.APP_EMAILS_IDOL_INDEX,
-                highlight: 'terms',
-                print: 'all'
-            }
-        }).then(
-            function (response) {
-                res.status(response.code).json(response.data.documents);
-            },
-            function (error) {
-                log.error("Query indexed messages error ->", error.data);
-                res.status(error.code).json(error.data);
-            }
-        );
+        new Email(req.IDOL)
+            .search(req.query)
+            .then(
+                function (result) {
+                    res.json(result.data.documents);
+                },
+                function (error) {
+                    res.status(error.status).json(error.json);
+                }
+            );
     }
 };

@@ -244,7 +244,7 @@ EmailOnDemand.controller('HistoryCtrl', [
                         }
                     })
                     .success(function (data) {
-                        $scope.History = JSON.parse(data).Data;
+                        $scope.History = data.Data;
                         $log.debug('History data', $scope.History);
                         $scope.fetching = false;
                     })

@@ -4,7 +4,7 @@
     "description": "Email services for IDOL OnDemand.",
     "main": "./src/server.js",
     "scripts": {
-        "test": "./node_modules/.bin/mocha"
+        "start": "node ./src/server.js"
     },
     "author": "TCCODER",
     "license": "MIT",
@@ -23,8 +23,5 @@
         "superagent": "visionmedia/superagent",
         "winston": "^0.9.0"
     },
-    "devDependencies": {
-        "mocha": "^2.1.0",
-        "supertest": "^0.15.0"
-    }
+    "devDependencies": {}
 }

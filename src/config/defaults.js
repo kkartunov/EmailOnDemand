@@ -23,8 +23,8 @@ module.exports = {
 
     // IDOL
     IDOL_API_KEY: process.env.IDOL_API_KEY,
-    APP_USERS_IDOL_STORE: 'emailondemand',
-    APP_EMAILS_IDOL_INDEX: 'emailondemand',
+    APP_USERS_IDOL_STORE: process.env.APP_USERS_IDOL_STORE || 'emailondemand',
+    APP_EMAILS_IDOL_INDEX: process.env.APP_EMAILS_IDOL_INDEX || 'emailondemand',
 
     // Mailjet
     MAILJET_API_KEY: process.env.MAILJET_API_KEY,
