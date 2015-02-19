@@ -256,6 +256,11 @@ EmailOnDemand.controller('HistoryCtrl', [
                     });
             }
         };
+
+        $scope.refresh = function () {
+            $scope.History = null;
+            $scope.onShow();
+        };
 }]);
 
 /**

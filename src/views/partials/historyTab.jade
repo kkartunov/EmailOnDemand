@@ -7,6 +7,9 @@ br
                 |  Message History.
         .panel-body
             p Listing last 10 sent messages.
+                a.pull-right(href="", ng-if="History", ng-click="refresh()")
+                    i.fa.fa-refresh
+                    |  Refresh
             i.fa.fa-circle-o-notch.fa-spin.fa-2x(ng-if="fetching")
             .table-responsive(ng-if="History.length")
                 table.table.table-hover
