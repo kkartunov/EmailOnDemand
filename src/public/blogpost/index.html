@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="keywords" content="email, Email, IDOL OnDemand, API, user">
+    <meta name="description" content="Email services for Your IDOL OnDemand in just 3 easy steps.">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <title>Email OnDemand - Email services for Your IDOL OnDemand in just 3 easy steps.</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" media="all">
+    <link rel="stylesheet" href="style.css" media="all">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Email OnDemand - standalone web application and API service for your IDOL OnDemand accounts.</h1>
+        <p>By <a href="https://www.topcoder.com/member-profile/kiri4a/" target="_blank">kiri4a</a> February 20, 2015</p>
+        <p>&nbsp;</p>
+        <p>
+            <em>Kiri4a wrote this blog post as part of a winning submission to a topcoder challenge. For more information on IDOL OnDemand topcoder challenges head to <a href="http://idolondemand.topcoder.com/" target="_blank">idolondemand.topcoder.com</a>
+        </em>
+        </p>
+        <p>The following article demonstrates how to integrate some of the available <a href="https://www.idolondemand.com/developer/apis" target="_blank">HP IDOL OnDemand APIs</a> with the <a href="http://dev.mailjet.com/getting-started/" target="_blank">Mailjet API</a> to create and host powerful standalone email system for your IDOL accounts. Additionally it provides a screen sharing video describing the web UI features, basic design and API usage.</p>
+        <ul class="list-unstyled"><strong>Table of contents</strong>
+            <li>
+                <a href="#Introduction and motivation">Introduction and motivation</a>
+            </li>
+            <li>
+                <a href="#Specification">Specification</a>
+            </li>
+            <li>
+                <a href="#The choise of implementation stack">The choise of implementation stack</a>
+            </li>
+            <li>
+                <a href="#Requirements">Requirements</a>
+            </li>
+            <li>
+                <a href="#Application infrastructure">Application infrastructure</a>
+            </li>
+            <li>
+                <a href="#Implementation">Implementation</a>
+                <ul>
+                    <li>
+                        <a href="#APIs involved">APIs involved</a>
+                    </li>
+                    <li>
+                        <a href="#Project packages">Project packages</a>
+                    </li>
+                    <li>
+                        <a href="#Codebase">Codebase</a>
+                    </li>
+                    <li>
+                        <a href="#API">API</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#Demo">Demo</a>
+            </li>
+        </ul>
+        <h2 id="Introduction and motivation">Introduction and motivation</h2>
+        <p>Communication is critical for any business, organisation and individual in the days of the fast changing global world. Thus being able to contact your users in a flexible, reliable and fast way is key to success. As an owner, manager or developer, you want to rely upon a solution that offers such capabilities and is easy to use, setup and support.</p>
+        <p>With HP IDOL OnDemand, Mailjet and some coding we will implement such system, setup the system and host it publicly on the Internet. Now, when we know what we are after, let’s define the specification for this system.</p>
+        <h2 id="Specification">Specification</h2>
+        <p>Let's begin with simple requirement - the system needs to be able to send emails to any user and/or any store or role of users available in IDOL OnDemand User Management for particular account. Also needs to be capable to authenticate who is currently using it, provide easy to use GUI for the end user and preferably programmatic access to its services. Last but not least the system has to be able to operate as <a href="http://en.wikipedia.org/wiki/Cloud_computing#Software_as_a_service_.28SaaS.29" target="_blank">Software as a service (SaaS)</a> to enable the business to reallocate IT operations costs away from hardware/software spending and personnel expenses, towards meeting other goals.</p>
+        <h2 id="The choise of implementation stack">The choise of implementation stack</h2>
+        <p>The nature of the application we are creating demand communication with public APIs in programmatic way in the back-end and ability to serve the application with its services to the end user. There are many ways to achieve this with different languages and frameworks but the author's preference favorite JavaScript and Node.js usage. Among other concerns such stack wins because it offers access to the rich of open source packages NPM community and the wide support of Node.js in many operational systems and even PaaS providers like Heroku or OpenShift. Additionally via NPM there is an <a href="https://www.npmjs.com/package/idol-client" target="_blank">IDOL OnDemand REST client JS library</a> available we are going to use to get a "flight start" and not to invent the wheel here.</p>
+        <p>For the front-end we will use the <a href="http://expressjs.com/" target="_blank">Express</a> framework to serve our app and API. Write the views in <a href="http://jade-lang.com/" target="_blank">Jade</a>, style them with <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> and provide rich interaction with <a href="https://angularjs.org/" target="_blank">AngularJS.</a>
+        </p>
+        <h2 id="Requirements">Requirements</h2>
+        <p>As annotated in the introduction we will use HP IDOL Ondemand API and Mailjet API for the implementation. Thus we will need valid accounts to work with the APIs. Currently we can register such ones for free <a href="https://www.idolondemand.com/signup.html" target="_blank">Sign up to IDOL OnDemand</a> and <a href="https://www.mailjet.com/signup" target="_blank">Sign up to Mailjet</a>.</p>
+        <p>After the successful registration with IDOL OnDemand, sign in and navigate to <a href="https://www.idolondemand.com/account/api-keys.html" target="_blank">API Keys > Manage</a> page to generate a new key. You should see something to the screen bellow:</p>
+        <p>&nbsp;</p>
+        <p class="text-center">
+            <img src="img/3.png" class="img-responsive">
+        </p>
+        <p>&nbsp;</p>
+        <p>After the successful registration with Mailjet, sign in and navigate to <a href="https://app.mailjet.com/account/api_keys" target="_blank">API Key Management</a>. You should see something to the screen bellow:</p>
+        <p>&nbsp;</p>
+        <p class="text-center">
+            <img src="img/4.png" class="img-responsive">
+        </p>
+        <p>&nbsp;</p>
+        <p>The stack chosen in previous section demand Node.JS and NPM to be available on the system where we run/host the application.</p>
+        <h2 id="Application infrastructure">Application infrastructure</h2>
+        <p>The mind map bellow gives basic visual representation of the topology of the application.</p>
+        <p class="text-center">
+            <img src="img/Email_OnDemandApplication.png" class="img-responsive">
+        </p>
+        <p>As we see above, we will implement the application in the back-end on the server. It will then provide rich UI to the end user (Frontend) and expose REST API for programmatic access too. Internally the application will communicate with IDOL OnDemand API and Mailjet API.</p>
+        <p>Such setup allows us to "play safe" and never expose the API keys we use internally to the client side. To add more on security we will serve the app via SSL. Additionally we are able to apply flexible user policy of who is allowed to use the system and etc.</p>
+        <h2 id="Implementation">Implementation</h2>
+        <p>This chapter describes the technical aspect of the programming and dives deeper into the application internals. Let's first discuss the APIs we are going to use and explain why.</p>
+        <h4 id="APIs involved">APIs involved</h4>
+        <p>According our specification we want to send emails via Mailjet to our users managed by IDOL OnDemand. More we would like to provide some sugar to the end user such as extracting text from files, references and urls and using it as email content. Additionally we want to index the emails we send in a text index to be able to offer search capabilities to the end user on request. Last but not least provide history and statistics of the sent emails. All those plans demand interaction between following <strong>6</strong> APIs:</p>
+        <ul>
+            <li><strong>IDOL OnDemand</strong>
+                <ul>
+                    <li>
+                        <a href="https://www.idolondemand.com/developer/apis/authenticate#overview" target="_blank">Authenticate</a> - This API provide us with capability to sign in the app users via email and password. Thus we can support sessions and different user levels (when the IDOL's role API is complete). To be able to use it first we need to create one "User Store" where we will store our users. For this task we use the <a href="https://www.idolondemand.com/developer/apis/addstore#overview" target="_blank">Add Store</a> API to create our store. It looks like this:
+                        <p>&nbsp;</p>
+                        <img src="img/5.png" class="img-responsive">
+                        <p>&nbsp;</p>
+                        <p>Next let's create some user[s] in this store. Repeat the step as many times as needed.</p>
+                        <p>&nbsp;</p>
+                        <img src="img/6.png" class="img-responsive">
+                        <p>&nbsp;</p>
+                    </li>
+                    <li>
+                        <a href="https://www.idolondemand.com/developer/apis/extracttext#overview" target="_blank">Text Extraction</a> - This API can extract text from files, IDOL references or urls. We are going to use it to offer "Gather content" feature to the end user in the process of composing the email.
+                    </li>
+                    <li>
+                        <a href="https://www.idolondemand.com/developer/apis/addtotextindex#overview" target="_blank">Add to Text Index</a> - This API allows us to add content to a text index that we have set up. The API indexes the content and makes it available for use in other APIs, such as Query Text Index that we will going to use when searching our sent emails. So let's create the text index we are going to use later. We will use <a href="https://www.idolondemand.com/developer/apis/createtextindex#overview" target="_blank">Create Text Index</a> API for that. It looks like this:
+                        <p>&nbsp;</p>
+                        <img src="img/7.png" class="img-responsive">
+                        <p>&nbsp;</p>
+                    </li>
+                    <li>
+                        <a href="https://www.idolondemand.com/developer/apis/querytextindex#overview" target="_blank">Query Text Index</a> - This API performs query on text indexes. We will use it to provide search email feature to the end user.
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Mailjet</strong>
+                <ul>
+                    <li><a href="http://dev.mailjet.com/guides/send-api-guide/" target="_blank">Send API</a> - This is the API that will be sending emails for us.
+                    </li>
+                    <li><a href="http://dev.mailjet.com/email-api/v3/messagesentstatistics/" target="_blank">API Key Statistical campaign/message data</a> - This is the API that will be using to obtain the history and status of the last 10 sent messages.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <h4 id="Project packages">Project packages</h4>
+        <p>We will depend on some NPM packages to not reinvent the wheel here but focus on the important implementation of our application. Here is how our NPM's package.json file, found in the root of the project folder looks like:</p>
+        <pre>
+{
+    "name": "emailondemand",
+    "version": "0.1.0",
+    "description": "Email services for IDOL OnDemand.",
+    "main": "./src/server.js",
+    "scripts": {
+        "start": "node ./src/server.js"
+    },
+    "author": "TCCODER",
+    "license": "MIT",
+    "dependencies": {
+        "body-parser": "^1.11.0",
+        "cors": "^2.5.3",
+        "dotenv": "^0.5.1",
+        "express": "^4.11.2",
+        "express-session": "^1.10.2",
+        "helmet": "^0.6.0",
+        "heroku-ssl-redirect": "0.0.2",
+        "idol-client": "^0.2.1",
+        "jade": "^1.9.2",
+        "lodash": "^3.2.0",
+        "multer": "^0.1.7",
+        "superagent": "visionmedia/superagent",
+        "winston": "^0.9.0"
+    },
+    "devDependencies": {}
+}</pre>
+        <p>To note here is that we define the "npm start" script command which we can use to start the app when needed. Most of the packages are Express related. Those not related are "idol-client" - used to communicate with IDOL OnDemand, "superagent" - used to talk to Mailjet APIs and "winston" - used for logging purposes.</p>
+        <h4 id="Codebase">Codebase</h4>
+        <p>We are not going to go over every file in the source code as this would burden the blog post. The code is heavy and well commented so use it to comprehend the parts of interest.</p>
+        <p>More interesting are the 2 classes (Email.js and Recipients.js) implemented in the solution.</p>
+        <p><strong>Recipients.js</strong> - is responsible for organizing the existing stores and users of the IDOL's User Management system in hierarchical tree. This is important and allows the application to be able to send emails to single, multiple users or to any user in a store. Internally this class uses cached requests/responses to minimize the load on the IDOL's API and preserve account quota but provide purge method to refresh the cache.</p>
+        <p><strong>Email.js</strong> - will wrap our calls to Mailjet to provide `send()` and `history()` methods. Also implement `search()` which can query the indexed sent emails via IDOL OnDemand.</p>
+        <h4 id="API">API</h4>
+        <p>To allow any external application to integrate with our project we will expose public REST API under the `/api/v1/` endpoints. It is better described by the appropriate way <a href="http://docs.emailondemand.apiary.io/#" target="_blank">here</a>.</p>
+        <h2 id="Demo">Demo</h2>
+        <p>Enoght talking, right? Let's see how our application looks like and behaves. The following video will help us:</p>
+    </div>
+</body>
