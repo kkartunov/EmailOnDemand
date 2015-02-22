@@ -58,6 +58,9 @@
             <li>
                 <a href="#Demo">Demo</a>
             </li>
+            <li>
+                <a href="#Conclusion">Conclusion</a>
+            </li>
         </ul>
         <h2 id="Introduction and motivation">Introduction and motivation</h2>
         <p>Communication is critical for any business, organisation and individual in the days of the fast changing global world. Thus being able to contact your users in a flexible, reliable and fast way is key to success. As an owner, manager or developer, you want to rely upon a solution that offers such capabilities and is easy to use, setup and support.</p>
@@ -165,10 +168,42 @@
         <p>We are not going to go over every file in the source code as this would burden the blog post. The code is heavy and well commented so use it to comprehend the parts of interest.</p>
         <p>More interesting are the 2 classes (Email.js and Recipients.js) implemented in the solution.</p>
         <p><strong>Recipients.js</strong> - is responsible for organizing the existing stores and users of the IDOL's User Management system in hierarchical tree. This is important and allows the application to be able to send emails to single, multiple users or to any user in a store. Internally this class uses cached requests/responses to minimize the load on the IDOL's API and preserve account quota but provide purge method to refresh the cache.</p>
+        <p>The following sketch represents the structure of the tree.</p>
+        <img class="img-responsive" src="img/RecipientsHierarchical_Tree.png">
+        <p>Here is to note that we do not take into consideration the Role APIs provided by IDOL OnDemand. This is because currently there is no way available for us to query the IDOL APIs and answer questions like:</p>
+        <ul>
+            <li>Which roles are assigned to some user?</li>
+            <li>Which users own the xxx role, for instance?</li>
+        </ul>
+        <p>The author has opened a discussion in the IDOL community <a href="https://community.idolondemand.com/t5/Forum/User-Management-API-list-users-by-role/m-p/1560#U1560" target="_blank">here</a> with the hope that at some point soon there will be such APIs. When we have the way to query roles we would be able to represent another abstraction layer to our recipients hierarchical tree. Our app will benefit a lot from such functionality. We could have admins, senders and etc user in our store and based on those roles serve different UI to the end user. That is why the "Manage" tab is currently disabled for all user. It is there just as future option...</p>
         <p><strong>Email.js</strong> - will wrap our calls to Mailjet to provide `send()` and `history()` methods. Also implement `search()` which can query the indexed sent emails via IDOL OnDemand.</p>
         <h4 id="API">API</h4>
         <p>To allow any external application to integrate with our project we will expose public REST API under the `/api/v1/` endpoints. It is better described by the appropriate way <a href="http://docs.emailondemand.apiary.io/#" target="_blank">here</a>.</p>
         <h2 id="Demo">Demo</h2>
         <p>Enoght talking, right? Let's see how our application looks like and behaves. The following video will help us:</p>
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" src="../screensharing/EmailOnDemand_player.html"></iframe>
+        </div>
+        <h2 id="Conclusion">Conclusion</h2>
+        <p>We have presented a solution in which we connect different APIs from various providers into purpose. With the help of those APIs and our coding powerful web app and API service useful for any kind of business, organisation and individual is born to life. It is a flexible email solution with easy to use extras, separated as standalone service, suitable for any IDOL OnDemand account. Aallows a business the potential to reduce IT operational costs by outsourcing hardware and software maintenance and support to the cloud. Just deploy, setup and host it to have emails going.</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h2>Let's talk about Email OnDemand...</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'emailondemand'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                var dsq = document.createElement('script');
+                dsq.type = 'text/javascript';
+                dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
     </div>
 </body>
